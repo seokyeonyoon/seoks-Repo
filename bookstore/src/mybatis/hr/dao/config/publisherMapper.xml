@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="mybatis.hr.dao.publisher">
+	<sql id="publisher-select">
+		select publisher_no,
+			publisher_name,
+			publisher_address,
+			publisher_tel
+		from publisher
+	</sql>
+
+	<insert id="insertPublisherSequence" parameterType="publisher">
+		<selectKey keyProperty="publisherNo" resultType="_int" order="BEFORE">
+			select pub_no_seq.nextval from dual
+		</selectKey>
+			insert into publisher(publisher_no, publisher_name, publisher_address, publisher_tel)
+			values(#{publisherNo},#{publisherName},#{publisherAddress},#{publisherTel})
+	</insert>
+
+	<delete id="deletePublisherByNo" parameterType="int">
+		delete from publisher where publisher_no = #{no}
+	</delete>
+	
+	<update id="updatePublisherByNo" parameterType="publisher">
+		update publisher
+		set publisher_name=#{publisherName}, publisher_address=#{publisherAddress}, publisher_tel=#{publisherTel}
+		where publisher_no=#{publisherNo}
+	</update>
+	
+	<select id="selectPublisherList" resultType="publisher">
+		<include refid="publisher-select"/>
+	</select>
+	
+	<select id="selectPublisherByAddress" parameterType="string" resultMap="publisher-resultmap">
+		<include refid="publisher-select"/>
+		where publisher_address like '%'||#{value}||'%'
+	</select>
+	
+	<select id="selectPublisherByNo" parameterType="int" resultMap="publisher-resultmap">
+		<include refid="publisher-select"/>
+		where publisher_no=#{value}
+	</select>
+
+	<resultMap type="publisher" id="publisher-resultmap">
+		<id column="publisher_no" property="publisherNo"/>
+		<result column="publisher_name" property="publisherName"/>
+		<result column="publisher_address" property="publisherAddress"/>
+		<result column="publisher_tel" property="publisherTel"/>
+		<collection property="books" ofType="book"> <!-- resultMap="mybatis.hr.dao.book.book-resultmap" bookMapper.xml에 있는 코드 재사용 가능하다 -->
+			<id column="isbn" property="isbn"/>
+			<result column="title" property="title"/>
+			<result column="author" property="author"/>
+			<result column="page" property="page"/>
+			<result column="price" property="price"/>
+			<result column="publish_date" property="publishDate"/>
+		</collection>
+	</resultMap>
+</mapper>
